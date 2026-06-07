@@ -1,62 +1,85 @@
 import pandas as pd
+import pickle
+
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, accuracy_score
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score
+)
 
-#read csv file
+# -----------------------------
+# LOAD DATA
+# -----------------------------
+df = pd.read_csv("Dataset/Logging_Monitoring_Anomalies_Enhanced.csv")
 
-data =pd.read_csv("Dataset/Logging_Monitoring_Anomalies_Enhanced.csv")
+# -----------------------------
+# CREATE FAILURE TARGET
+# -----------------------------
+failure_conditions = (
+    (df["CPU_Usage_Percent"] > 80) |
+    (df["Memory_Usage_MB"] > 15000) |
+    (df["Disk_Usage_Percent"] > 90) |
+    (df["Failed_Transactions"] > 30) )
 
+df["Failure"] = failure_conditions.astype(int)
 
-#convert severity to binary target
+# -----------------------------
+# FEATURES
+# -----------------------------
+features = [
+    "CPU_Usage_Percent",
+    "Memory_Usage_MB",
+    "Disk_Usage_Percent",
+    "Failed_Transactions",
+    "Retry_Count",
+    "Alert_Count",
+    "Error_Count"
+]
 
-data["failure"] = data["Severity"].apply(lambda x:1 if x== "High" else 0)
-print(data["failure"].value_counts())
+X = df[features]
+y = df["Failure"]
 
-#keeping only useful columns
+# -----------------------------
+# TRAIN TEST SPLIT
+# -----------------------------
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+)
 
-features = [ "CPU_Usage_Percent",
-            "Memory_Usage_MB",
-            "Disk_Usage_Percent",
-            "Response_Time_ms",
-            "Failed_Transactions",
-            "Alert_Count",
-            "Error_Count",
-            "Retry_Count",
-            "Escalation_Level"]
-X= data[features]
-
-y= data["failure"]
-
-#splitting dataset into train and test sets
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, 
-                                                    random_state=42,
-                                                    stratify=y)
-
-model = RandomForestClassifier(n_estimators=100,
-                                random_state=42)
+# -----------------------------
+# TRAIN MODEL
+# -----------------------------
+model = RandomForestClassifier(
+    n_estimators=100,
+    random_state=42
+)
 
 model.fit(X_train, y_train)
 
+# -----------------------------
+# EVALUATE
+# -----------------------------
 predictions = model.predict(X_test)
 
-accuracy = accuracy_score(y_test, predictions)
+print("Accuracy :", accuracy_score(y_test, predictions))
+print("Precision:", precision_score(y_test, predictions))
+print("Recall   :", recall_score(y_test, predictions))
+print("F1 Score :", f1_score(y_test, predictions))
 
-print("Accuracy;", accuracy)
-
-
-
-# Saving the model
-
-import pickle
-import os
-
-# Absolute path to Streamlit Dashboard folder
-save_path = r"C:\Users\kgeet\OneDrive\Desktop\PredictOps-AI\Streamlit Dashboard\random_forest_model.pkl"
+# -----------------------------
+# SAVE MODEL
+# -----------------------------
+save_path = r"C:\Users\kgeet\OneDrive\Desktop\PredictOps-AI\models\random_forest.pkl"
 
 with open(save_path, "wb") as f:
     pickle.dump(model, f)
 
-print("Model Saved at:", save_path)
-
+print("Model Saved Successfully")
+print(save_path)

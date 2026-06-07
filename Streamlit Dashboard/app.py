@@ -33,6 +33,7 @@ from pages.monitoring import show_monitoring
 from pages.failure_prediction import show_prediction
 from pages.rf_insights import show_rf_insights
 from pages.recommendations import show_recommendations
+from pages.model_comparison import show_model
 
 from utils.data_loader import load_data
 from utils.model_loader import load_model
@@ -44,7 +45,7 @@ except Exception as e:
     st.stop()
 
 model = load_model()
-model = load_model()
+
 
 features = [
     "CPU_Usage_Percent",
@@ -70,7 +71,8 @@ page = st.sidebar.radio(
      "Monitoring",
      "Failure Prediction",
      "RF Insights",
-     "Recommendations"])
+     "Recommendations",
+     "model_comparision"])
        
 if page == "Dashboard":
     show_dashboard(df)
@@ -87,7 +89,9 @@ elif page == "RF Insights":
 elif page == "Recommendations":
     show_recommendations(df)
 
+elif page == "model_comparision":
+    show_model(df)
 
-  
+
 
 
