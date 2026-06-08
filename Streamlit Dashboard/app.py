@@ -53,15 +53,19 @@ features = [
     "Disk_Usage_Percent",
     "Response_Time_ms",
     "Failed_Transactions",
+    "Retry_Count",
     "Alert_Count",
     "Error_Count",
-    "Retry_Count",
     "Escalation_Level"
 ]
 
 X = df[features]
 
 df["Predicted_Failure"] = model.predict(X)
+X = X[model.feature_names_in_]
+
+df["Predicted_Failure"] = model.predict(X)
+
 
 st.sidebar.title("Navigation")
 

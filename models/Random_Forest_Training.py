@@ -33,10 +33,12 @@ features = [
     "CPU_Usage_Percent",
     "Memory_Usage_MB",
     "Disk_Usage_Percent",
+    "Response_Time_ms",
     "Failed_Transactions",
     "Retry_Count",
     "Alert_Count",
-    "Error_Count"
+    "Error_Count",
+    "Escalation_Level"
 ]
 
 X = df[features]
@@ -60,6 +62,7 @@ model = RandomForestClassifier(
     n_estimators=100,
     random_state=42
 )
+
 
 model.fit(X_train, y_train)
 

@@ -37,9 +37,9 @@ def show_recommendations(df):
         "Disk_Usage_Percent",
         "Response_Time_ms",
         "Failed_Transactions",
+        "Retry_Count",
         "Alert_Count",
         "Error_Count",
-        "Retry_Count",
         "Escalation_Level"
     ]
 

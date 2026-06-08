@@ -36,10 +36,12 @@ def predict(data: PredictRequest):
             "CPU_Usage_Percent": data.CPU_Usage_Percent,
             "Memory_Usage_MB": data.Memory_Usage_MB,
             "Disk_Usage_Percent": data.Disk_Usage_Percent,
+            "Response_Time_ms": data.Response_Time_ms,
             "Failed_Transactions": data.Failed_Transactions,
             "Retry_Count": data.Retry_Count,
             "Alert_Count": data.Alert_Count,
-            "Error_Count": data.Error_Count
+            "Error_Count": data.Error_Count,
+            "Escalation_Level": data.Escalation_Level
         }])
 
         prediction = model.predict(input_df)[0]
