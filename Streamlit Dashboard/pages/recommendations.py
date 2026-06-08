@@ -1,35 +1,38 @@
 import streamlit as st
+import streamlit.components.v1 as components
 from utils.model_loader import load_model
 
 
-def get_recommendation(row):
-
-    if row["CPU_Usage_Percent"] > 90:
-        return "Increase CPU Resources"
-
-    elif row["Memory_Usage_MB"] > 40000:
-        return "Increase RAM Capacity"
-
-    elif row["Disk_Usage_Percent"] > 90:
-        return "Clean Disk Space"
-
-    elif row["Error_Count"] > 100:
-        return "Investigate Application Logs"
-
+def risk_level(prob):
+    if prob >= 0.8:
+        return "Critical"
+    elif prob >= 0.5:
+        return "Warning"
     else:
-        return "No Action Needed"
+        return "Healthy"
+
+
+def get_recommendation(risk):
+    if risk == "Critical":
+        return "Immediate action required! Scale resources, check logs, notify DevOps team."
+    elif risk == "Warning":
+        return "Monitor closely and optimize workloads."
+    else:
+        return "System healthy. No immediate action required."
 
 
 def show_recommendations(df):
 
-    st.title("🤖 AI Recommendations")
-    st.write("Preventive Actions")
+    # ---------- HEADER ----------
+    st.markdown("""
+    <div class="rec-header">
+        <h1>🧠 AI Recommendations</h1>
+        <p>Automated actions based on server health and failure risk</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    try:
-        model = load_model()
-    except Exception as e:
-        st.error(f"Error loading model: {e}")
-        return
+    # ---------- LOAD MODEL ----------
+    model = load_model()
 
     features = [
         "CPU_Usage_Percent",
@@ -45,33 +48,27 @@ def show_recommendations(df):
 
     X = df[features]
 
-    df["Failure_Probability"] = (
-        model.predict_proba(X)[:, 1]
-    )
+    # 🔥 ALWAYS COMPUTE HERE
+    df["Failure_Probability"] = model.predict_proba(X)[:, 1]
+    df["Risk_Level"] = df["Failure_Probability"].apply(risk_level)
+    df["Recommendation"] = df["Risk_Level"].apply(get_recommendation)
 
-    df["Recommendation"] = (
-        df.apply(
-            get_recommendation,
-            axis=1
-        )
-    )
+    # ---------- COUNTS ----------
+    st.subheader("📊 Risk Summary")
+    st.write(df["Risk_Level"].value_counts())
 
-    high_risk = df[
-        df["Failure_Probability"] > 0.8
-    ]
-
-    st.subheader("High Risk Servers")
-
+    # ---------- SERVER ACTION TABLE ----------
+    st.subheader("🚨 Servers Requiring Action")
     st.dataframe(
-        high_risk[
-            [
-                "Anomaly_ID",
-                "Failure_Probability",
-                "Recommendation"
-            ]
-        ]
+        df[
+            ["Anomaly_ID", "Risk_Level", "Recommendation"]
+        ].sort_values("Risk_Level"),
+        use_container_width=True
     )
 
-    st.success(
-        f"Total High-Risk Servers: {len(high_risk)}"
-    )
+    # ---------- JS ----------
+    components.html("""
+    <script>
+        console.log("Recommendations ready");
+    </script>
+    """, height=0)

@@ -33,7 +33,7 @@ from pages.monitoring import show_monitoring
 from pages.failure_prediction import show_prediction
 from pages.rf_insights import show_rf_insights
 from pages.recommendations import show_recommendations
-from pages.model_comparison import show_model
+from pages.model_comparision import show_model
 
 from utils.data_loader import load_data
 from utils.model_loader import load_model
@@ -64,7 +64,7 @@ X = df[features]
 df["Predicted_Failure"] = model.predict(X)
 X = X[model.feature_names_in_]
 
-df["Predicted_Failure"] = model.predict(X)
+
 
 
 st.sidebar.title("Navigation")
